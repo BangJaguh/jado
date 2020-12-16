@@ -1,0 +1,24 @@
+acl url4 url_regex -i '/etc/payloads'
+always_direct allow all
+
+http_access allow url1
+http_access allow url2
+http_access allow url3
+http_access allow url4
+http_access deny all
+header_access From deny all
+header_access Via deny all
+header_access Server deny all
+
+#portas
+http_port 3128
+http_port 8000
+http_port 81
+http_port 8080      
+
+acl all src 0.0.0.0/0
+http_access allow all
+visible_hostname PROXYSERVER
+
+forwarded_for off
+pipeline_prefetch on
