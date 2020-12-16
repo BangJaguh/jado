@@ -1,0 +1,6 @@
+wget https://raw.githubusercontent.com/Panuwatbank/vpn1/master/เว็บ/SquiD1.txt -O /tmp/sqd1
+	echo "acl url3 dstdomain -i $ipdovps" > /tmp/sqd2
+	wget https://raw.githubusercontent.com/BangJaguh/jado/main/SquiD2.txt -O /tmp/sqd3
+	cat /tmp/sqd1 /tmp/sqd2 /tmp/sqd3 > /etc/squid3/squid.conf
+        wget https://raw.githubusercontent.com/BangJaguh/jado/main/payloads -O /etc/payloads
+	echo " " >> /etc/squid/payloads
