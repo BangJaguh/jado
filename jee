@@ -67,7 +67,8 @@ export EASY_RSA="${EASY_RSA:-.}"
 "$EASY_RSA/pkitool" client
 cd
 # key
-openvpn --genkey --secret keys/ta.key
+# Generate key for tls-auth
+openvpn --genkey --secret /etc/openvpn/ta.key
 
 cd ~/openvpn-ca/keys
 sudo cp ca.crt server.crt server.key ta.key dh2048.pem /etc/openvpn
@@ -143,6 +144,7 @@ echo '<tls-auth>' >> /root/noload.ovpn
 cat /etc/openvpn/ta.key >> /root/noload.ovpn
 echo '</tls-auth>' >> /root/noload.ovpn
 # create tu200 openvpn config
+
 cat > /root/tu200.ovpn <<-END
 client
 dev tun
