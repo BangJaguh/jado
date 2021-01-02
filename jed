@@ -338,6 +338,16 @@ sed -i $MYIP2 /etc/openvpn/client-tcp-2200.ovpn;
 echo '<ca>' >> /etc/openvpn/client-tcp-1194.ovpn
 cat /etc/openvpn/ca.crt >> /etc/openvpn/client-tcp-1194.ovpn
 echo '</ca>' >> /etc/openvpn/client-tcp-1194.ovpn
+echo '<cert>' >> /etc/openvpn/client-tcp-1194.ovpn
+cat /etc/openvpn/white-vps.crt >> /etc/openvpn/client-tcp-1194.ovpn
+echo '</cert>' >> /etc/openvpn/client-tcp-1194.ovpn
+echo '<key>' >> /etc/openvpn/client-tcp-1194.ovpn
+cat /etc/openvpn/white-vps.key >> /etc/openvpn/client-tcp-1194.ovpn
+echo '</key>' >> /etc/openvpn/client-tcp-1194.ovpn
+echo '<tls-auth>' >> /etc/openvpn/client-tcp-1194.ovpn
+cat /etc/openvpn/ta.key >> /etc/openvpn/client-tcp-1194.ovpn
+echo '</tls-auth>' >> /etc/openvpn/client-tcp-1194.ovpn
+
 
 # masukkan certificatenya ke dalam config client UDP 1194
 echo '<ca>' >> /etc/openvpn/client-udp-1194.ovpn
