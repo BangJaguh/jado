@@ -404,109 +404,80 @@ cert = /etc/stunnel/stunnel.pem
 
 END
 
-#Setting UFW
-ufw allow ssh
-ufw allow 443/tcp
-sed -i 's|DEFAULT_INPUT_POLICY="DROP"|DEFAULT_INPUT_POLICY="ACCEPT"|' /etc/default/ufw
-sed -i 's|DEFAULT_FORWARD_POLICY="DROP"|DEFAULT_FORWARD_POLICY="ACCEPT"|' /etc/default/ufw
-
-# set ipv4 forward
-echo 1 > /proc/sys/net/ipv4/ip_forward
-sed -i 's|#net.ipv4.ip_forward=1|net.ipv4.ip_forward=1|' /etc/sysctl.conf
-sysctl -w net.ipv4.ip_forward=1
-
-#Setting IPtables
+# setting iptables
 cat > /etc/iptables.up.rules <<-END
 *nat
 :PREROUTING ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A POSTROUTING -j SNAT --to-source xxxxxxxxx
+-A POSTROUTING -j SNAT --to-source ipaddresxxx
 -A POSTROUTING -o eth0 -j MASQUERADE
--A POSTROUTING -s 192.168.10.0/24 -o eth0 -j MASQUERADE
--A POSTROUTING -j MASQUERADE
+-A POSTROUTING -s 192.168.100.0/24 -o eth0 -j MASQUERADE
+-A POSTROUTING -s 10.1.0.0/24 -o eth0 -j MASQUERADE
 COMMIT
+
 *filter
-:INPUT ACCEPT [0:0]
+:INPUT ACCEPT [19406:27313311]
 :FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [9393:434129]
 :fail2ban-ssh - [0:0]
--A INPUT -p tcp -m multiport --dports 22 -j fail2ban-ssh
+-A FORWARD -i eth0 -o ppp0 -m state --state RELATED,ESTABLISHED -j ACCEPT
+-A FORWARD -i ppp0 -o eth0 -j ACCEPT
 -A INPUT -p ICMP --icmp-type 8 -j ACCEPT
 -A INPUT -p tcp -m tcp --dport 53 -j ACCEPT
 -A INPUT -p tcp --dport 22  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 80  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 143  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 442  -m state --state NEW -j ACCEPT
 -A INPUT -p tcp --dport 443  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 444  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 1153  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 1153  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 3128  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 3128  -m state --state NEW -j ACCEPT
--A INPUT -p tcp --dport 8000  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 8000  -m state --state NEW -j ACCEPT 
+-A INPUT -p udp --dport 80  -m state --state NEW -j ACCEPT
 -A INPUT -p tcp --dport 8080  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 8080  -m state --state NEW -j ACCEPT 
--A INPUT -p tcp --dport 8888  -m state --state NEW -j ACCEPT
--A INPUT -p udp --dport 8888  -m state --state NEW -j ACCEPT 
--A INPUT -p tcp --dport 10000  -m state --state NEW -j ACCEPT
--A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP                            
--A INPUT -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP         
--A INPUT -f -j DROP                                                                                
--A INPUT -p tcp -m tcp ! --tcp-flags FIN,SYN,RST,ACK SYN -m state --state NEW -j DROP              
--A INPUT -m string --string "peer_id" --algo kmp --to 65535 -j DROP                                
--A INPUT -m string --string "BitTorrent" --algo kmp --to 65535 -j DROP                             
--A INPUT -m string --string "BitTorrent protocol" --algo kmp --to 65535 -j DROP                    
--A INPUT -m string --string "bittorrent-announce" --algo kmp --to 65535 -j DROP                    
--A INPUT -m string --string "announce.php?passkey=" --algo kmp --to 65535 -j DROP                  
--A INPUT -m string --string "find_node" --algo kmp --to 65535 -j DROP                              
--A INPUT -m string --string "info_hash" --algo kmp --to 65535 -j DROP                              
--A INPUT -m string --string "get_peers" --algo kmp --to 65535 -j DROP                              
--A INPUT -m string --string "announce" --algo kmp --to 65535 -j DROP                               
--A INPUT -m string --string "announce_peers" --algo kmp --to 65535 -j DROP                         
--A INPUT -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP                       
--A INPUT -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP                         
--A INPUT -p udp -m string --string "announce" --algo bm --to 65535 -j DROP                         
--A INPUT -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP                        
--A INPUT -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP                          
--A FORWARD -i eth0 -o ppp0 -m state --state RELATED,ESTABLISHED -j ACCEPT                          
--A FORWARD -i ppp0 -o eth0 -j ACCEPT                                                               
--A FORWARD -p tcp -m tcp --dport 6881:6889 -j DROP                                                 
--A FORWARD -m string --string "get_peers" --algo bm --to 65535 -j DROP                             
--A FORWARD -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP                     
--A FORWARD -p udp -m string --string "BitTorrent protocol" --algo bm --to 65535 -j DROP            
--A FORWARD -p udp -m string --string "peer_id=" --algo bm --to 65535 -j DROP                       
--A FORWARD -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP                       
--A FORWARD -p udp -m string --string "announce.php?passkey=" --algo bm --to 65535 -j DROP          
--A FORWARD -p udp -m string --string "torrent" --algo bm --to 65535 -j DROP                        
--A FORWARD -p udp -m string --string "announce" --algo bm --to 65535 -j DROP                       
--A FORWARD -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP                      
--A FORWARD -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP                        
--A OUTPUT -p udp -m string --string "tracker" --algo bm --to 65535 -j DROP                         
--A OUTPUT -p udp -m string --string "info_hash" --algo bm --to 65535 -j DROP                       
--A OUTPUT -p udp -m string --string "announce" --algo bm --to 65535 -j DROP                        
--A OUTPUT -p udp -m string --string ".torrent" --algo bm --to 65535 -j DROP                        
--A OUTPUT -p udp -m string --string "BitTorrent" --algo bm --to 65535 -j DROP                      
--A OUTPUT -p tcp -m tcp --dport 1723 -j ACCEPT                                                     
--A OUTPUT -p icmp -m icmp --icmp-type 8 -j DROP                                                    
--A OUTPUT -p tcp -m tcp --dport 6881:6889 -j DROP
--A fail2ban-ssh -j RETURN
+-A INPUT -p udp --dport 3128  -m state --state NEW -j ACCEPT
 COMMIT
+
 *raw
-:PREROUTING ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
+:PREROUTING ACCEPT [158575:227800758]
+:OUTPUT ACCEPT [46145:2312668]
 COMMIT
+
 *mangle
-:PREROUTING ACCEPT [0:0]
-:INPUT ACCEPT [0:0]
+:PREROUTING ACCEPT [158575:227800758]
+:INPUT ACCEPT [158575:227800758]
 :FORWARD ACCEPT [0:0]
-:OUTPUT ACCEPT [0:0]
-:POSTROUTING ACCEPT [0:0]
+:OUTPUT ACCEPT [46145:2312668]
+:POSTROUTING ACCEPT [46145:2312668]
 COMMIT
 END
-sed -i $MYIP2 /etc/iptables.up.rules;
+sed -i '$ i\iptables-restore < /etc/iptables.up.rules' /etc/rc.local
+sed -i $IPADD /etc/iptables.up.rules;
 iptables-restore < /etc/iptables.up.rules
+# disable ipv6
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
+# add dns server ipv4
+echo "nameserver 1.1.1.1" > /etc/resolv.conf
+echo "nameserver 1.0.0.1" >> /etc/resolv.conf
+sed -i '$ i\echo "nameserver 1.1.1.1" > /etc/resolv.conf' /etc/rc.local
+sed -i '$ i\echo "nameserver 1.0.0.1" >> /etc/resolv.conf' /etc/rc.local
+sed -i '$ i\sleep 10' /etc/rc.local
+sed -i '$ i\for p in $(pgrep openvpn); do renice -n -20 -p $p; done' /etc/rc.local
+# set time GMT +8
+ln -fs /usr/share/zoneinfo/Asia/Manila /etc/localtime
+# setting ufw
+ufw allow ssh
+ufw allow 443/tcp
+sed -i 's|DEFAULT_INPUT_POLICY="DROP"|DEFAULT_INPUT_POLICY="ACCEPT"|' /etc/default/ufw
+sed -i 's|DEFAULT_FORWARD_POLICY="DROP"|DEFAULT_FORWARD_POLICY="ACCEPT"|' /etc/default/ufw
+cat > /etc/ufw/before.rules <<-END
+# START OPENVPN RULES
+# NAT table rules
+*nat
+:POSTROUTING ACCEPT [0:0]
+# Allow traffic from OpenVPN client to eth0
+-A POSTROUTING -s 10.8.0.0/8 -o eth0 -j MASQUERADE
+COMMIT
+# END OPENVPN RULES
+END
+ufw enable
+ufw status
+ufw disable
 
 # Configure Nginx
 sed -i 's/\/var\/www\/html;/\/home\/vps\/public_html\/;/g' /etc/nginx/sites-enabled/default
